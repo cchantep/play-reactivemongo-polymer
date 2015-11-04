@@ -20,3 +20,6 @@ project/play-fork-run.sbt
 project/sbt-ui.sbt
 projectFilesBackup/
 
+# Bower plugin
+/node_modules/
+/public/components/

@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html>
-<head lang="en">
+<html lang="en">
+<head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Play Framework - ReactiveMongo - Polymer</title>
 </head>
 <body>
     <div>
@@ -29,9 +29,10 @@
         <p>
         To connect to database <a href="https://github.com/ReactiveMongo/Play-ReactiveMongo">Play-ReactiveMongo</a> plugin is used.
         To make it work the following has been done:
+        </p>
         <ol>
             <li>Adding dependency in <a href="#code/build.sbt" class="shortcut">build.sbt</a>
-                <pre><code>"org.reactivemongo" %% "play2-reactivemongo" % "0.10.5.0.akka23"</code></pre>
+                <pre><code>"org.reactivemongo" %% "play2-reactivemongo" % "0.11.7.play24"</code></pre>
             </li>
             <li>Adding plugin in <a href="#code/conf/play.plugins" class="shortcut">play.plugins</a>
                 <pre><code>1100:play.modules.reactivemongo.ReactiveMongoPlugin</code></pre>
@@ -40,7 +41,6 @@
                 <pre><code>mongodb.uri = "mongodb://localhost:27017/posts"</code></pre>
             </li>
         </ol>
-        </p>
 
     </div>
 
@@ -49,7 +49,8 @@
 
         <p>
             The application tier is delivered by a simple <code>Play</code> app.
-            This way you can easily take advantage of <code>Play</code>'s ecosystem, eg. add some plugins or other benefits, such as Akka, CoffeScript support Web Sockets and many, many more.
+            This way you can easily take advantage of <code>Play</code>'s ecosystem, eg. add some plugins or other
+            benefits, such as Akka, CoffeScript support Web Sockets and many, many more.
             The template has one <code>Controller</code>: <a href="#code/app/controllers/Posts.scala" class="shortcut">Posts</a>.
             It has <code>PostRepo</code> which uses <code>Play-ReactiveMongo</code> plugin under the hood.
 
@@ -173,11 +174,14 @@
     <div>
         <h2>Frontend</h2>
         <p>
-            Frontend is based on <a href="https://www.polymer-project.org/"><code>Polymer</code></a> which uses <a href="http://webcomponents.org/"><code>Web Components</code></a>.
+            Frontend is based on <a href="https://www.polymer-project.org/"><code>Polymer</code></a> which uses
+            <a href="http://webcomponents.org/"><code>Web Components</code></a>.
             It's a very prospecting technology, promising true component development of the web.
         </p>
         <p>
-            For sake of this template this <a href="https://www.polymer-project.org/docs/start/tutorial/intro.html">sample app</a> available on Polymer website has been used.
+            For sake of this template this
+            <a href="https://www.polymer-project.org/docs/start/tutorial/intro.html">sample app</a> available on Polymer
+            website has been used.
         </p>
         <p>
             All resources from the sample app have been copied to <a href="#code/public" class="shortcut">public</a> directory in Play application.
