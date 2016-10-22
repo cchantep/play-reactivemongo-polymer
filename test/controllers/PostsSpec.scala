@@ -9,8 +9,9 @@ import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
 import play.modules.reactivemongo.ReactiveMongoApi
+import reactivemongo.play.json._ // JSON/BSON
 import reactivemongo.api.commands.LastError
-import reactivemongo.bson.BSONDocument
+import reactivemongo.bson.{BSONDocument,BSONObjectID}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -20,8 +21,8 @@ object PostsSpec extends org.specs2.mutable.Specification with Results with Mock
   val mockPostRepo = mock[PostMongoRepo]
   val reactiveMongoRepo = mock[ReactiveMongoApi]
 
-  val FirstPostId = "5559e224cdecd3b535e8b681"
-  val SecondPostId = "5559e224cdecd3b535e8b682"
+  val FirstPostId = BSONObjectID.parse("5559e224cdecd3b535e8b681").get
+  val SecondPostId = BSONObjectID.parse("5559e224cdecd3b535e8b682").get
 
   val wojciechPost = Json.obj(
     Id -> FirstPostId,

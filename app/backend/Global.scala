@@ -1,20 +1,41 @@
-import javax.inject.Inject
+package backend
 
-import play.api.Play.current
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import play.api.libs.iteratee.Enumerator
+import javax.inject._
+
+import scala.util.{Failure,Success}
+
+import scala.concurrent.{Await,ExecutionContext}
+import scala.concurrent.duration._
+
+import play.api._
 import play.api.libs.json.Json
-import play.api.{ Logger, Application, GlobalSettings }
+import play.api.{Logger, Application}
+import com.google.inject.AbstractModule
+import play.api.inject.{ApplicationLifecycle, Binding, Module}
 
 import play.modules.reactivemongo.ReactiveMongoApi
-import play.modules.reactivemongo.json.collection.JSONCollection
+import reactivemongo.play.json.collection.JSONCollection
+
+/**
+ * MongoDB module.
+ */
+@Singleton
+final class GlobalModule(
+  environment: Environment, configuration: Configuration)
+    extends AbstractModule {
+
+  def configure() = bind(classOf[Global]).asEagerSingleton()
+}
 
 class Global @Inject() (
-  val reactiveMongoApi: ReactiveMongoApi) extends GlobalSettings {
+  appCycle: ApplicationLifecycle,
+  reactiveMongoApi: ReactiveMongoApi,
+  implicit val ec: ExecutionContext) {
 
-  def collection = reactiveMongoApi.db.collection[JSONCollection]("posts")
+  private def collection = reactiveMongoApi.database.map(
+    _.collection[JSONCollection]("posts"))
 
-  val posts = List(
+  private def posts = List(
     Json.obj(
       "text" -> "Have you heard about the Web Components revolution?",
       "username" -> "Eric",
@@ -65,18 +86,24 @@ class Global @Inject() (
     )
   )
 
-  override def onStart(app: Application) {
+  private def onStart() {
     Logger.info("Application has started")
 
-    collection.bulkInsert(posts.toStream, ordered = true).
-      foreach(i => Logger.info("Database was initialized"))
+    Await.result(
+      collection.flatMap(_.bulkInsert(posts.toStream, ordered = true)).andThen {
+        case Failure(reason) =>
+          Logger.error("Fails to initialize database", reason)
+
+        case _ => Logger.info("Database was initialized")
+      }, 10.seconds)
   }
 
-  override def onStop(app: Application) {
+  appCycle.addStopHook { () =>
     Logger.info("Application shutdown...")
 
-    collection.drop().onComplete {
-      case _ => Logger.info("Database collection dropped")
-    }
+    collection.flatMap(_.drop(false)).
+      map(_ => Logger.info("Database collection dropped"))
   }
+
+  onStart()
 }

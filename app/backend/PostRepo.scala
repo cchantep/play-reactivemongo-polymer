@@ -2,7 +2,7 @@ package backend
 
 import play.api.libs.json.{JsObject, Json}
 import play.modules.reactivemongo.ReactiveMongoApi
-import play.modules.reactivemongo.json.collection.JSONCollection
+import reactivemongo.play.json.collection.JSONCollection
 import reactivemongo.api.ReadPreference
 import reactivemongo.api.commands.WriteResult
 import reactivemongo.bson.{BSONObjectID, BSONDocument}
@@ -23,16 +23,16 @@ class PostMongoRepo(reactiveMongoApi: ReactiveMongoApi) extends PostRepo {
   // BSON-JSON conversions
   import play.modules.reactivemongo.json._
 
-  protected def collection =
-    reactiveMongoApi.db.collection[JSONCollection]("posts")
+  private def collection(implicit ec: ExecutionContext) =
+    reactiveMongoApi.database.map(_.collection[JSONCollection]("posts"))
 
   def find()(implicit ec: ExecutionContext): Future[List[JsObject]] =
-    collection.find(Json.obj()).cursor[JsObject](ReadPreference.Primary).collect[List]()
+    collection.flatMap(_.find(Json.obj()).
+      cursor[JsObject](ReadPreference.Primary).collect[List]())
 
-  def update(selector: BSONDocument, update: BSONDocument)(implicit ec: ExecutionContext): Future[WriteResult] = collection.update(selector, update)
+  def update(selector: BSONDocument, update: BSONDocument)(implicit ec: ExecutionContext): Future[WriteResult] = collection.flatMap(_.update(selector, update))
 
-  def remove(document: BSONDocument)(implicit ec: ExecutionContext): Future[WriteResult] = collection.remove(document)
+  def remove(document: BSONDocument)(implicit ec: ExecutionContext): Future[WriteResult] = collection.flatMap(_.remove(document))
 
-  def save(document: BSONDocument)(implicit ec: ExecutionContext): Future[WriteResult] =
-    collection.update(BSONDocument("_id" -> document.get("_id").getOrElse(BSONObjectID.generate)), document, upsert = true)
+  def save(document: BSONDocument)(implicit ec: ExecutionContext): Future[WriteResult] = collection.flatMap(_.update(BSONDocument("_id" -> document.get("_id").getOrElse(BSONObjectID.generate)), document, upsert = true))
 }
