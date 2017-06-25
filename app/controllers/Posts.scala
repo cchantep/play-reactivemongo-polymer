@@ -45,7 +45,7 @@ class Posts @Inject() (val reactiveMongoApi: ReactiveMongoApi)
   }
 
   private def RedirectAfterPost(result: WriteResult, call: Call): Result =
-    if (result.inError) InternalServerError(result.toString)
+    if (!result.ok) InternalServerError(result.toString)
     else Redirect(call)
 
   def add = Action.async(BodyParsers.parse.json) { implicit request =>
